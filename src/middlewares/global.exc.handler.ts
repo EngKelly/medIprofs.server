@@ -19,22 +19,23 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
 
     let httpStatus: number;
-    let message: {};
+    let message: any;
     if (exception instanceof HttpException) {
       message = exception.getResponse();
       httpStatus = exception.getStatus();
-      console.log(message);
     } else {
       message = {
         statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
         message: 'Sorry! something unexpected happened.',
         error: 'Internal server error',
       };
-      console.error(`${Date.now()} ${exception}`);
+      console.error(
+        `Date: ${new Date().toUTCString()} || Exception: ${exception}`,
+      );
     }
     const responseBody: {} = {
       message: message,
-      timestamp: new Date().toISOString(),
+      Date: new Date().toUTCString(),
       path: httpAdapter.getRequestUrl(ctx.getRequest()),
     };
     httpAdapter.reply(ctx.getResponse(), responseBody, httpStatus);

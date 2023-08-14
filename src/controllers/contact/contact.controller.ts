@@ -1,9 +1,17 @@
-import { RequestQuery } from './../../data/Dtos/request.query.dto';
+import { PaginationQueryDto } from './../../data/Dtos/request.query.dto';
 import { HttpResponse } from './../../data/Dtos/http.response.dto';
 import { ContactDto } from 'src/data/Dtos/contact.dto';
 import { ContactService } from './../../services/contact/contact.service';
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
-import { ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
+import { ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Contact')
 @Controller('contact')
@@ -18,7 +26,7 @@ export class ContactController {
   }
 
   @ApiQuery({
-    name: 'keyword',
+    name: 'limit',
     example: 'true',
     description: 'fetch contacts by recent data: enter true or false',
   })
@@ -27,10 +35,27 @@ export class ContactController {
     example: '1',
     description: 'how many page to return',
   })
+  @ApiQuery({
+    name: 'IsFetchByMonth',
+    example: true,
+    description: 'how many page to return',
+  })
   @Get('get-all')
-  async getAll(
-    @Query() query: RequestQuery,
+  async getAllAsync(
+    @Query() query: PaginationQueryDto,
   ): Promise<HttpResponse<ContactDto[]>> {
     return await this.contactService.findAllContactsAsync(query);
+  }
+
+  @ApiParam({
+    name: 'Id',
+    example: '64ccc47d84ef702de8ec4f1b',
+    description: 'Delete contact by Id',
+  })
+  @Delete('delete/:id')
+  async deleteContactAsync(
+    @Param() id: string,
+  ): Promise<HttpResponse<{ deleted: boolean }>> {
+    return this.contactService.deleteContactAsync(id);
   }
 }
