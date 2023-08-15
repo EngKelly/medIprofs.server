@@ -1,9 +1,6 @@
 import { ConvertToBool } from './../../utils/convertToBool';
 import { ObjectIdValidator } from '../../utils/objectId.validator.utils';
-import {
-  RequestQuery,
-  PaginationQueryDto,
-} from '../../data/Dtos/request.query.dto';
+import { PaginationQueryDto } from '../../data/Dtos/request.query.dto';
 import {
   BadRequestException,
   HttpStatus,

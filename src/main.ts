@@ -10,12 +10,11 @@ async function bootstrap() {
     origin: process.env.CLIENT_URL,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true, // Set this to true if your app uses sessions/authentication
-    allowedHeaders: 'Content-Type, Accept',
+    allowedHeaders: 'Content-Type, Accept, Authorization',
   });
 
   // Enable global validation pipe
   //app.useGlobalPipes(new ValidationPipe());
-
   setupSwagger(app);
   const PORT: number | string = process.env.PORT || 5000;
   await app.listen(PORT);

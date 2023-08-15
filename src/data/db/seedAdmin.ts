@@ -38,7 +38,7 @@ export class Seeder {
       email: model.email,
       password: hashedPassword,
       profileURL: model.profileURL,
-      roles: model.role,
+      role: model.role,
       isActive: true,
     });
 
