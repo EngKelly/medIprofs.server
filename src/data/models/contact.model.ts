@@ -1,8 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { IsNotEmpty } from 'class-validator';
+import { Document } from 'mongoose';
 
 @Schema({ timestamps: true })
-export class Contact {
+export class Contact extends Document {
   @IsNotEmpty()
   @Prop()
   name: string;
