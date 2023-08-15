@@ -1,15 +1,27 @@
-import { RequestQuery } from './../../data/Dtos/request.query.dto';
-import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
+import { ConvertToBool } from './../../utils/convertToBool';
+import { ObjectIdValidator } from '../../utils/objectId.validator.utils';
+import {
+  RequestQuery,
+  PaginationQueryDto,
+} from '../../data/Dtos/request.query.dto';
+import {
+  BadRequestException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { HttpResponse } from '../../data/Dtos/http.response.dto';
-import { Contact } from 'src/data/models/contact.model';
+import { Contact } from '../../data/models/contact.model';
 import { ContactDto } from '../../data/Dtos/contact.dto';
 
 @Injectable()
 export class ContactService {
   constructor(
     @InjectModel(Contact.name) private contactModel: Model<Contact>,
+    private objectIdValidator: ObjectIdValidator,
+    private convertToBool: ConvertToBool,
   ) {}
 
   async contactAsync(model: ContactDto): Promise<HttpResponse<ContactDto>> {
@@ -27,28 +39,32 @@ export class ContactService {
   }
 
   async findAllContactsAsync(
-    query: RequestQuery,
+    query: PaginationQueryDto,
   ): Promise<HttpResponse<ContactDto[]>> {
-    let date: number;
-    if (query.keyword == null || query.keyword == 'false') {
-      date = null;
-    } else if (query.keyword == 'true') {
-      date = new Date().getMonth();
-    }
-    const page: number =
-      query.page == null ? (query.page = 1) : Number(query.page);
-    const resPerPage: number = 2;
-    const skip: number = resPerPage * (page - 1);
-
     let contact: any;
-    if (date != null) {
+    const skip = (query.page - 1) * query.limit;
+
+    const IsFetchByMonth: boolean = await this.convertToBool.execute(
+      query.IsFetchByMonth,
+    );
+    if (IsFetchByMonth) {
+      const currentYear = new Date().getFullYear();
+      const currentMonth = new Date().getMonth();
+      const startDate = new Date(currentYear, currentMonth - 1, 1); // months are 0-indexed
+      const endDate = new Date(currentYear, currentMonth, 1); // first day of the next month
+
       contact = await this.contactModel
-        .find({ createdAt: { $gte: date } })
-        .limit(10)
+        .find({
+          createdAt: {
+            $gte: startDate,
+            $lt: endDate,
+          },
+        })
         .skip(skip)
+        .limit(query.limit)
         .exec();
     } else {
-      contact = await this.contactModel.find().limit(10).skip(skip).exec();
+      contact = await this.contactModel.find().skip(skip).limit(query.limit);
     }
     if (contact.length <= 0) {
       const response: HttpResponse = {
@@ -61,6 +77,27 @@ export class ContactService {
       statusCode: HttpStatus.OK,
       message: 'these are list of available messages',
       data: contact,
+    };
+    return response;
+  }
+
+  async deleteContactAsync(
+    id: string,
+  ): Promise<HttpResponse<{ deleted: boolean }>> {
+    this.objectIdValidator.validate(id);
+
+    let contact = this.contactModel.findById(id).exec();
+
+    if (contact == null) {
+      throw new NotFoundException('Message not found.');
+    }
+
+    contact = this.contactModel.findByIdAndDelete(id).exec();
+
+    const response: HttpResponse<{ deleted: boolean }> = {
+      message: 'Message deleted.',
+      statusCode: HttpStatus.OK,
+      data: { deleted: true },
     };
     return response;
   }
