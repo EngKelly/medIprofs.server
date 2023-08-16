@@ -1,3 +1,5 @@
+import { AuthGuard } from './../../guards/auth.guard';
+import { RoleGuard } from './../../guards/role.guard';
 import { UserDto } from '../../services/users/Dto/user.dto';
 import { UserService } from '../../services/users/user.service';
 import {
@@ -15,9 +17,13 @@ import {
   Param,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { HttpResponse } from '../../data/Dtos/http.response.dto';
-import { RequestQuery } from '../../data/Dtos/request.query.dto';
+import {
+  PaginationQueryDto,
+  RequestQuery,
+} from '../../data/Dtos/request.query.dto';
 import { User } from '../../data/models/user';
 
 @Controller('user')
@@ -31,6 +37,7 @@ export class UserController {
     description: 'update user by id.',
     example: '64ab1a87297483d2a1ac9952',
   })
+  @UseGuards(AuthGuard)
   @Put('/:id')
   public async updateUser(
     @Param('id') id: string,
@@ -67,6 +74,7 @@ export class UserController {
     description: 'delete user by id.',
     example: '64abd59ff841a66adf4effec',
   })
+  @UseGuards(RoleGuard)
   @Delete('/:id')
   public async deleteUser(@Param('id') id: string): Promise<HttpResponse> {
     return await this.userService.deleteUserAsync(id);
@@ -81,12 +89,19 @@ export class UserController {
   @ApiQuery({
     name: 'page',
     required: false,
-    description: 'How many user to return pair page.',
-    example: 2,
+    description: 'Number of page',
+    example: 1,
   })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'How many user to return pair page.',
+    example: 10,
+  })
+  @UseGuards(RoleGuard)
   @Get('get-all')
   public async getAllUser(
-    @Query() query: RequestQuery,
+    @Query() query: PaginationQueryDto,
   ): Promise<HttpResponse<User[]>> {
     return await this.userService.getAllUserAsync(query);
   }
@@ -98,6 +113,7 @@ export class UserController {
     example: '64abd59ff841a66adf4effec',
   })
   @Get('/:id')
+  @UseGuards(AuthGuard)
   public async getUser(
     @Param('id') id: string,
   ): Promise<HttpResponse<UserDto>> {

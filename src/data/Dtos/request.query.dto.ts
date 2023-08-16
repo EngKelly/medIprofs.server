@@ -19,13 +19,17 @@ export class PaginationQueryDto {
 
   @IsOptional()
   @IsInt()
-  year: number;
+  year?: number;
 
   @IsOptional()
   @IsInt()
-  month: number;
+  month?: number;
 
   @IsOptional()
   @IsString()
   IsFetchByMonth: string = 'true';
+
+  @IsOptional()
+  @IsString()
+  keyword: string = 'true';
 }
