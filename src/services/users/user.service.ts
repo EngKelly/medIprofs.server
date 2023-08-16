@@ -1,4 +1,4 @@
-import { RequestQuery } from './../../data/Dtos/request.query.dto';
+import { PaginationQueryDto } from './../../data/Dtos/request.query.dto';
 import { User } from './../../data/models/user';
 import { UserDto } from './Dto/user.dto';
 import { HttpStatus, Injectable } from '@nestjs/common';
@@ -66,14 +66,14 @@ export class UserService {
   }
 
   public async getAllUserAsync(
-    query: RequestQuery,
+    query: PaginationQueryDto,
   ): Promise<HttpResponse<User[]>> {
     const keyword: string =
       query.keyword == null ? (query.keyword = '') : query.keyword;
     const page: number =
       query.page == null ? (query.page = 1) : Number(query.page);
-    const resPerPage: number = 2;
-    const skip: number = resPerPage * (page - 1);
+    const skip = (query.page - 1) * query.limit;
+
     let filter: {} = {};
     if (keyword != '') {
       filter = {
@@ -85,7 +85,7 @@ export class UserService {
     }
     const user = await this.userModel
       .find({ ...filter })
-      .limit(resPerPage)
+      .limit(query.limit)
       .skip(skip)
       .exec();
     if (user.length <= 0) {
