@@ -28,7 +28,7 @@ export class ContactService {
 
     const contact = await this.contactModel.create(model);
     const response: HttpResponse<ContactDto> = {
-      message: `${model.name} we have received you message, we will get back to you immediately.`,
+      message: `${model.name} we have received you message, we will get back to you shortly.`,
       statusCode: HttpStatus.OK,
       data: contact,
     };
@@ -83,13 +83,13 @@ export class ContactService {
   ): Promise<HttpResponse<{ deleted: boolean }>> {
     this.objectIdValidator.validate(id);
 
-    let contact = this.contactModel.findById(id).exec();
+    let contact = await this.contactModel.findById(id).exec();
 
     if (contact == null) {
       throw new NotFoundException('Message not found.');
     }
 
-    contact = this.contactModel.findByIdAndDelete(id).exec();
+    contact = await this.contactModel.findByIdAndDelete(id).exec();
 
     const response: HttpResponse<{ deleted: boolean }> = {
       message: 'Message deleted.',
