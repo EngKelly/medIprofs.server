@@ -39,7 +39,7 @@ export class ContactService {
     query: PaginationQueryDto,
   ): Promise<HttpResponse<ContactDto[]>> {
     let contact: any;
-    const skip = (query.page - 1) * query.limit;
+    const skip = (query.page - 1) * Number(query.limit);
 
     const IsFetchByMonth: boolean = await this.convertToBool.execute(
       query.IsFetchByMonth,

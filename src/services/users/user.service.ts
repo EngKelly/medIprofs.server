@@ -72,7 +72,7 @@ export class UserService {
       query.keyword == null ? (query.keyword = '') : query.keyword;
     const page: number =
       query.page == null ? (query.page = 1) : Number(query.page);
-    const skip = (query.page - 1) * query.limit;
+    const skip = (page - 1) * Number(query.limit);
 
     let filter: {} = {};
     if (keyword != '') {
