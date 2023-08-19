@@ -66,7 +66,7 @@ export class ContactService {
     if (contact.length <= 0) {
       const response: HttpResponse = {
         message: 'No contact found.',
-        statusCode: HttpStatus.BAD_REQUEST,
+        statusCode: HttpStatus.NOT_FOUND,
       };
       return response;
     }
